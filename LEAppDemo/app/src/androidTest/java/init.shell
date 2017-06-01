@@ -1,0 +1,6 @@
+chmod 777 /dev/ttyS*
+chmod 777 /dev/ttymxc*
+chmod 777 /dev/ttyHB*
+chmod 777 /dev/bus/usb/*
+chmod 777 /dev/bus/usb/*/*
+

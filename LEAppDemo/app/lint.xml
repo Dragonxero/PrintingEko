@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<lint>
+    <issue id="CutPasteId">
+        <ignore path="src/com/incomrecycle/prms/rvm/gui/action/GUIActionAlarm.java" />
+    </issue>
+</lint>

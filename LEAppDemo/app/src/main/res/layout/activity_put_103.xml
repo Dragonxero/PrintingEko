@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="utf-8"?>
+<AbsoluteLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/background" >
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal" >
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="80px"
+            android:layout_marginTop="5px"
+            android:text="@string/setupCfgTimerNumText"
+            android:textColor="@color/serial_number_color"
+            android:textSize="@dimen/serial_number_size" />
+
+        <TextView
+            android:id="@+id/serial_number"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="5px"
+            android:textColor="@color/serial_number_color"
+            android:textSize="@dimen/serial_number_size" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="@dimen/linear_first_width"
+        android:layout_height="@dimen/linear_first_height"
+        android:layout_x="@dimen/linear_first_x"
+        android:layout_y="@dimen/linear_first_y"
+        android:orientation="horizontal" >
+
+        <LinearLayout
+            android:id="@+id/putAdvanceLinnearlayout"
+            android:layout_width="@dimen/linear_left_width"
+            android:layout_height="@dimen/linear_left_height"
+            android:orientation="vertical" >
+
+            <RelativeLayout
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="60px"
+                android:background="@drawable/centerback" >
+
+                <ImageView
+                    android:id="@+id/ImageView"
+                    android:layout_width="fill_parent"
+                    android:layout_height="500px"
+                    android:gravity="center"
+                    android:keepScreenOn="true"
+                    android:visibility="gone" />
+
+                <TextView
+                    android:id="@+id/puthintLarge"
+                    android:layout_width="fill_parent"
+                    android:layout_height="500px"
+                    android:gravity="bottom|center"
+                    android:text="@string/puthint"
+                    android:textColor="#ff0000"
+                    android:textSize="40sp" />
+            </RelativeLayout>
+
+            <TextView
+                android:id="@+id/hint"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="60px"
+                android:layout_marginTop="20px"
+                android:gravity="left"
+                android:text="@string/hint"
+                android:textColor="#336666"
+                android:textSize="@dimen/start_put_textsize"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/puthint"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="60px"
+                android:layout_marginTop="10px"
+                android:gravity="left"
+                android:text="@string/puthint"
+                android:textColor="#ff0000"
+                android:textSize="@dimen/start_put_textsize"
+                android:textStyle="bold" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            android:layout_marginLeft="25px"
+            android:orientation="vertical" >
+
+            <TextView
+                android:id="@+id/time"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/linear_right_timeText_marginTop"
+                android:gravity="center_horizontal"
+                android:textColor="@color/linear_right_timeText_textColor"
+                android:textSize="@dimen/linear_right_timeText_textSize" />
+
+            <TableLayout
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="280px" >
+
+                <TableRow
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center"
+                    android:padding="10px" >
+
+                    <Button
+                        android:id="@+id/close"
+                        android:layout_width="@dimen/linear_right_button_width"
+                        android:layout_height="@dimen/linear_right_button_height"
+                        android:background="@drawable/rvm_btn"
+                        android:text="@string/close"
+                        android:textColor="#ffffff"
+                        android:textSize="20sp" />
+                </TableRow>
+            </TableLayout>
+        </LinearLayout>
+    </LinearLayout>
+
+</AbsoluteLayout>

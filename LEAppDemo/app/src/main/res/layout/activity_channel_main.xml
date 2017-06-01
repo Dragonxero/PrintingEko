@@ -1,0 +1,54 @@
+<AbsoluteLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="@dimen/activity_layout_width"
+    android:layout_height="@dimen/activity_layout_height"
+    android:background="@drawable/background"
+    tools:context=".RVMSettingsActivity" >
+
+    <LinearLayout
+        android:layout_width="@dimen/linear_first_width"
+        android:layout_height="@dimen/linear_first_height"
+        android:layout_x="@dimen/linear_first_x"
+        android:layout_y="@dimen/linear_first_y" >
+
+        <LinearLayout
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            android:layout_marginLeft="@dimen/linear_right_marginLeft"
+            android:orientation="vertical" >
+
+            <TextView
+                android:id="@+id/showNumText"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/linear_right_timeText_marginTop"
+                android:gravity="center_horizontal"
+                android:singleLine="true"
+                android:textColor="@color/linear_right_timeText_textColor"
+                android:textSize="@dimen/linear_right_timeText_textSize" />
+
+            <TableLayout
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="20px" >
+
+                <TableRow
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="@dimen/linear_right_tableRow_marginBottom"
+                    android:gravity="center" >
+
+                    <Button
+                        android:id="@+id/backButton"
+                        android:layout_width="@dimen/linear_right_button_width"
+                        android:layout_height="@dimen/linear_right_button_height"
+                        android:background="@drawable/rvm_btn"
+                        android:text="@string/backBtn"
+                        android:textColor="@color/button_textColor"
+                        android:textSize="@dimen/linear_right_button_textSize" />
+                </TableRow>
+            </TableLayout>
+        </LinearLayout>
+    </LinearLayout>
+
+</AbsoluteLayout>
