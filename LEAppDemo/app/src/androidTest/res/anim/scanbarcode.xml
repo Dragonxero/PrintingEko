@@ -1,9 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-    <animation-list android:oneshot="false"
-	xmlns:android="http://schemas.android.com/apk/res/android">
-	<item android:duration="150" android:drawable="@drawable/scanbarcode1" />
-	<item android:duration="150" android:drawable="@drawable/scanbarcode2" />
-	<item android:duration="150" android:drawable="@drawable/scanbarcode3" />
-	<item android:duration="150" android:drawable="@drawable/scanbarcode4" />
-	<item android:duration="150" android:drawable="@drawable/scanbarcode5" />
-   </animation-list>
