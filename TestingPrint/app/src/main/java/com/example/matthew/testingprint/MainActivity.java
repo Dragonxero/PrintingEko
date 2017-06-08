@@ -22,15 +22,14 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        String textModel = new String(IOUtils.readResource("assets/model/voucher_inst.txt"));
-        HashMap<String, String> hsmpParam = new HashMap<String, String>();
-        //EditText textToPrint = (EditText) findViewById(R.id.txtToPrint);
-        hsmpParam.put("$BARCODE$","123456789012");
-        //hsmpParam.put("$BARCODE$", textToPrint.toString());
-        BasePrinter basePrinter = CommEntity.getPrinter(1);
-        basePrinter.print(textModel, hsmpParam);
+//        String textModel = new String(IOUtils.readResource("assets/model/voucher_inst.txt"));
+//        HashMap<String, String> hsmpParam = new HashMap<String, String>();
+//        //EditText textToPrint = (EditText) findViewById(R.id.txtToPrint);
+//        hsmpParam.put("$BARCODE$","123456789012");
+//        //hsmpParam.put("$BARCODE$", textToPrint.toString());
+//        BasePrinter basePrinter = CommEntity.getPrinter(1);
+//        basePrinter.print(textModel, hsmpParam);
 
-        /*
         CommEntity.init();
 
         Button btnPrint = (Button) findViewById(R.id.btnPrint);
@@ -51,7 +50,6 @@ public class MainActivity extends AppCompatActivity {
             }
 
         });
-        */
     }
 
 
