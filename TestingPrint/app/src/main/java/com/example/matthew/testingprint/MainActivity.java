@@ -32,7 +32,7 @@ import common.utils.IOUtils;
 
 public class MainActivity extends AppCompatActivity {
 
-    public final static int QRcodeWidth = 500 ;
+    public final static int QRcodeWidth = 500;
     private static final String IMAGE_DIRECTORY = "/QRcodeDemonuts";
     Bitmap bitmap;
 
@@ -46,53 +46,29 @@ public class MainActivity extends AppCompatActivity {
 
         CommEntity.init();
 
-
-        /*
-        btnPrint.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                //try {
-                String textModel = new String(IOUtils.readResource("assets/model/voucher_qr.txt"));
-                HashMap<String, String> hsmpParam = new HashMap<String, String>();
-                EditText textToPrint = (EditText) findViewById(R.id.txtToPrint);
-                hsmpParam.put("$QRCODE$", "Puntos Obtenidos: "+ textToPrint.getText().toString());
-                //hsmpParam.put("$BARCODE$", textToPrint.toString());
-                BasePrinter basePrinter = CommEntity.getPrinter(1);
-                basePrinter.print(textModel, hsmpParam);
-                //} catch (Exception e) {
-                //    Log.e("Impresora: ", "Error", e);
-                //}
-            }
-
-        });
-        */
     }
 
-    public void createQR (View view) {
+    public void createQR(View view) {
 
-        if(data.getText().toString().trim().length() == 0) {
+        if (data.getText().toString().trim().length() == 0) {
             Toast.makeText(MainActivity.this, "Enter String!", Toast.LENGTH_SHORT).show();
-        }
-        else {
+        } else {
             try {
-                bitmap =  TextToImageEncode(data.getText().toString());
+                bitmap = TextToImageEncode(data.getText().toString());
                 qr.setImageBitmap(bitmap);
                 String path = saveImage(bitmap);
-                Toast.makeText(MainActivity.this, "QR creado en  => "+ path, Toast.LENGTH_SHORT).show();
-            }
-            catch (WriterException e) {
+                Toast.makeText(MainActivity.this, "QR creado en  => " + path, Toast.LENGTH_SHORT).show();
+            } catch (WriterException e) {
                 e.printStackTrace();
             }
         }
     }
 
-    public void printQR (View view){
-        String textModel = new String(IOUtils.readResource("assets/model/voucher_inst.txt"));
+    public void printQR(View view) {
+        String textModel = new String(IOUtils.readResource("assets/model/voucher_qr.txt"));
         HashMap<String, String> hsmpParam = new HashMap<>();
         String info = data.getText().toString().trim();
-        //Formato par enviar el QR mostrado
-        //TODO: Find a way to send to the printer.
-        //Bitmap bmap = qr.getDrawingCache();
+        //TODO: Find a way to send qr to the printer.
         hsmpParam.put("$QRDATA$", info);
         BasePrinter basePrinter = CommEntity.getPrinter(1);
         basePrinter.print(textModel, hsmpParam);
@@ -130,8 +106,11 @@ public class MainActivity extends AppCompatActivity {
         return "";
 
     }
+
+    public BitMatrix bitMatrix;
+
     private Bitmap TextToImageEncode(String Value) throws WriterException {
-        BitMatrix bitMatrix;
+        //BitMatrix bitMatrix;
         try {
             bitMatrix = new MultiFormatWriter().encode(
                     Value,
@@ -155,7 +134,7 @@ public class MainActivity extends AppCompatActivity {
             for (int x = 0; x < bitMatrixWidth; x++) {
 
                 pixels[offset + x] = bitMatrix.get(x, y) ?
-                        getResources().getColor(R.color.colorBlack):getResources().getColor(R.color.colorWhite);
+                        getResources().getColor(R.color.colorBlack) : getResources().getColor(R.color.colorWhite);
             }
         }
         Bitmap bitmap = Bitmap.createBitmap(bitMatrixWidth, bitMatrixHeight, Bitmap.Config.ARGB_4444);
