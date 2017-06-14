@@ -1,34 +1,71 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!--
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<android.support.constraint.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context="com.example.matthew.testingprint.MainActivity">
-    -->
-
-<LinearLayout
-        xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:padding="10dp"
-    tools:context="com.example.matthew.testingprint.MainActivity">
 
     <EditText
-        android:id="@+id/txtToPrint"
-        android:layout_height="wrap_content"
-        android:layout_width="wrap_content"
-        android:text="Write there!"
-        />
+        android:id="@+id/textdata"
+        android:layout_width="348dp"
+        android:layout_height="0dp"
+        android:hint="Ingresa datos"
+        app:layout_constraintTop_toTopOf="parent"
+        android:layout_marginTop="8dp"
+        android:layout_marginRight="8dp"
+        app:layout_constraintRight_toRightOf="parent"
+        android:layout_marginLeft="8dp"
+        app:layout_constraintLeft_toLeftOf="parent"
+        android:layout_marginStart="8dp"
+        android:layout_marginEnd="8dp" />
 
     <Button
-        android:id="@+id/btnPrint"
-        android:layout_width="wrap_content"
+        android:id="@+id/btn_create"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:text="Imprimir"
-        />
+        android:layout_marginEnd="8dp"
+        android:layout_marginLeft="8dp"
+        android:layout_marginRight="8dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="6dp"
+        android:onClick="createQR"
+        android:text="Create Image"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/textdata"
+        app:layout_constraintHorizontal_bias="0.0" />
 
-</LinearLayout>
+    <ImageView
+        android:id="@+id/qrfield"
+        android:layout_width="300dp"
+        android:layout_height="300dp"
+
+        android:layout_marginLeft="8dp"
+        android:layout_marginRight="8dp"
+        android:layout_marginTop="6dp"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/btn_create"
+        android:layout_marginStart="8dp"
+        android:layout_marginEnd="8dp"
+        app:layout_constraintHorizontal_bias="0.544" />
+
+    <Button
+        android:id="@+id/btn_print"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="8dp"
+        android:layout_marginLeft="8dp"
+        android:layout_marginRight="8dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="16dp"
+        android:onClick="printQR"
+        android:text="Print QR"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/qrfield" />
+
+</android.support.constraint.ConstraintLayout>

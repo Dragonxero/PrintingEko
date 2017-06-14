@@ -6,4 +6,4 @@
 [TEXT]This is an example.
 [BARCODE]EAN13:$BARCODE$
 [LINE]
-[CUT]HALF
+[CUT]ALL
