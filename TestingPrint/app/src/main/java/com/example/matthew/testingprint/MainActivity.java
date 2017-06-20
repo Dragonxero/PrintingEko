@@ -8,10 +8,8 @@ import android.os.Environment;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
-import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.zxing.BarcodeFormat;
@@ -35,37 +33,37 @@ public class MainActivity extends AppCompatActivity {
     public final static int QRcodeWidth = 500;
     private static final String IMAGE_DIRECTORY = "/QRcodeDemonuts";
     Bitmap bitmap;
-
-    EditText data = (EditText) findViewById(R.id.textdata);
-    ImageView qr = (ImageView) findViewById(R.id.qrfield);
+    EditText data;
+    ImageView qr;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
+        data = (EditText) findViewById(R.id.textdata);
+        qr = (ImageView) findViewById(R.id.qrfield);
         CommEntity.init();
-
     }
 
-    public void createQR(View view) {
-
-        if (data.getText().toString().trim().length() == 0) {
-            Toast.makeText(MainActivity.this, "Enter String!", Toast.LENGTH_SHORT).show();
-        } else {
-            try {
-                bitmap = TextToImageEncode(data.getText().toString());
-                qr.setImageBitmap(bitmap);
-                String path = saveImage(bitmap);
-                Toast.makeText(MainActivity.this, "QR creado en  => " + path, Toast.LENGTH_SHORT).show();
-            } catch (WriterException e) {
-                e.printStackTrace();
+        public void createQR(View view) {
+            EditText data = (EditText) findViewById(R.id.textdata);
+            if (data.getText().toString().trim().length() == 0) {
+                Toast.makeText(MainActivity.this, "Enter String!", Toast.LENGTH_SHORT).show();
+            } else {
+                try {
+                    bitmap = TextToImageEncode(data.getText().toString());
+                    qr.setImageBitmap(bitmap);
+                    String path = saveImage(bitmap);
+                    Toast.makeText(MainActivity.this, "QR creado en  => " + path, Toast.LENGTH_SHORT).show();
+                } catch (WriterException e) {
+                    e.printStackTrace();
+                }
             }
         }
-    }
 
     public void printQR(View view) {
-        String textModel = new String(IOUtils.readResource("assets/model/voucher_qr.txt"));
+        EditText data = (EditText) findViewById(R.id.textdata);
+        String textModel = new String(IOUtils.readResource("assets/model/voucher_inst.txt"));
         HashMap<String, String> hsmpParam = new HashMap<>();
         String info = data.getText().toString().trim();
         //TODO: Find a way to send qr to the printer.
@@ -104,7 +102,6 @@ public class MainActivity extends AppCompatActivity {
             e1.printStackTrace();
         }
         return "";
-
     }
 
     public BitMatrix bitMatrix;
@@ -132,7 +129,6 @@ public class MainActivity extends AppCompatActivity {
             int offset = y * bitMatrixWidth;
 
             for (int x = 0; x < bitMatrixWidth; x++) {
-
                 pixels[offset + x] = bitMatrix.get(x, y) ?
                         getResources().getColor(R.color.colorBlack) : getResources().getColor(R.color.colorWhite);
             }
