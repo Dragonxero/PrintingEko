@@ -436,7 +436,8 @@ public abstract class BasePrinter {
         return true;
     }
 
-    private boolean cmdQRCode(String str) {
+    //Changed from private to public
+    public boolean cmdQRCode(String str) {
         if (StringUtils.isBlank(str))
             return true;
         int idx = str.indexOf(':');

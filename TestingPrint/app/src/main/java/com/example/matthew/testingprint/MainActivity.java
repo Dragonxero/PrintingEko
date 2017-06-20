@@ -35,7 +35,11 @@ public class MainActivity extends AppCompatActivity {
     Bitmap bitmap;
     EditText data;
     ImageView qr;
-
+    /*
+    NOTE: Crear objetos fuera ara usarlos de forma global requiere
+          que sean encontrados entro del metodo on create para ser
+          referenciados dentro del layout.
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -69,7 +73,8 @@ public class MainActivity extends AppCompatActivity {
         //TODO: Find a way to send qr to the printer.
         hsmpParam.put("$QRDATA$", info);
         BasePrinter basePrinter = CommEntity.getPrinter(1);
-        basePrinter.print(textModel, hsmpParam);
+        //basePrinter.print(textModel, hsmpParam);
+        basePrinter.cmdQRCode(info);
     }
 
     //Metodos para crear el QR y luego mostarlo en la pantalla.
