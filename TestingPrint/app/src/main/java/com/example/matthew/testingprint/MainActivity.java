@@ -35,6 +35,7 @@ public class MainActivity extends AppCompatActivity {
     Bitmap bitmap;
     EditText data;
     ImageView qr;
+
     /*
     NOTE: Crear objetos fuera ara usarlos de forma global requiere
           que sean encontrados entro del metodo on create para ser
@@ -49,23 +50,24 @@ public class MainActivity extends AppCompatActivity {
         CommEntity.init();
     }
 
-        public void createQR(View view) {
-            EditText data = (EditText) findViewById(R.id.textdata);
-            if (data.getText().toString().trim().length() == 0) {
-                Toast.makeText(MainActivity.this, "Enter String!", Toast.LENGTH_SHORT).show();
-            } else {
-                try {
-                    bitmap = TextToImageEncode(data.getText().toString());
-                    qr.setImageBitmap(bitmap);
-                    String path = saveImage(bitmap);
-                    Toast.makeText(MainActivity.this, "QR creado en  => " + path, Toast.LENGTH_SHORT).show();
-                } catch (WriterException e) {
-                    e.printStackTrace();
-                }
+    public void createQR(View view) {
+        EditText data = (EditText) findViewById(R.id.textdata);
+        if (data.getText().toString().trim().length() == 0) {
+            Toast.makeText(MainActivity.this, "Enter String!", Toast.LENGTH_SHORT).show();
+        } else {
+            try {
+                bitmap = TextToImageEncode(data.getText().toString());
+                qr.setImageBitmap(bitmap);
+                String path = saveImage(bitmap);
+                Toast.makeText(MainActivity.this, "QR creado en  => " + path, Toast.LENGTH_SHORT).show();
+            } catch (WriterException e) {
+                e.printStackTrace();
             }
         }
+    }
 
     public void printQR(View view) {
+        /*
         EditText data = (EditText) findViewById(R.id.textdata);
         String textModel = new String(IOUtils.readResource("assets/model/voucher_inst.txt"));
         HashMap<String, String> hsmpParam = new HashMap<>();
@@ -75,6 +77,16 @@ public class MainActivity extends AppCompatActivity {
         BasePrinter basePrinter = CommEntity.getPrinter(1);
         //basePrinter.print(textModel, hsmpParam);
         basePrinter.cmdQRCode(info);
+        */
+        String textModel = "[FORMAT]\n" +
+                "[RESET]\n" +
+                "[DATAMATRIX]QRCODE:http://www.google.com\n" +
+                "[LINE]\n" +
+                "[CUT]HALF";
+
+        HashMap<String, String> hsmpParam = new HashMap<String, String>();
+        BasePrinter basePrinter = CommEntity.getPrinter(1);
+        basePrinter.print(textModel, hsmpParam);
     }
 
     //Metodos para crear el QR y luego mostarlo en la pantalla.
