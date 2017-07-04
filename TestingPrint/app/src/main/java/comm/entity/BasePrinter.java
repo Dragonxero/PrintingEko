@@ -1,23 +1,25 @@
 package comm.entity;
 
-import android.util.Log;
-
-import com.google.code.microlog4android.Logger;
-
-import common.utils.IOUtils;
-import common.utils.StringUtils;
-
 import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 
+import android.graphics.Bitmap;
+
+import com.google.code.microlog4android.Logger;
+
+import common.utils.IOUtils;
+import common.utils.StringUtils;
+
 public abstract class BasePrinter {
+
     private final static Logger logger = Logger.getLogger("PrinterCommEntity");
     private static final String FORMAT_MARK = "[FORMAT]";
 
     private static class PrinterCmd {
+
         private static final String MODEL = "[MODEL]";
         private static final String RESET = "[RESET]";
         private static final String SETTINGS = "[SETTINGS]";
@@ -33,6 +35,7 @@ public abstract class BasePrinter {
     }
 
     protected static class PrinterOptions {
+
         public static final String SETTINGS_STRONG = "STRONG";
         public static final String SETTINGS_UNDERLINE = "UNDERLINE";
         public static final String SETTINGS_HIGHSIZE = "HIGHSIZE";
@@ -53,6 +56,7 @@ public abstract class BasePrinter {
     }
 
     public static interface PrinterCmdExecutor {
+
         boolean execute(String str, HashMap<String, String> hsmpParam);
     }
 
@@ -171,8 +175,9 @@ public abstract class BasePrinter {
 
     public String preview(String str, HashMap<String, String> hsmpParam) {
         StringBuffer sb = new StringBuffer();
-        if (StringUtils.isBlank(str))
+        if (StringUtils.isBlank(str)) {
             return sb.toString();
+        }
         if (hsmpParam != null) {
             if (hsmpParam.size() > 0) {
                 String[][] convert = new String[hsmpParam.size()][];
@@ -237,19 +242,15 @@ public abstract class BasePrinter {
     }
 
     public boolean print(String str, HashMap<String, String> hsmpParam) {
-        //try {
-            if (StringUtils.isBlank(str)) {
-                return true;
+        if (StringUtils.isBlank(str)) {
+            return true;
+        }
+        int idx = str.indexOf(FORMAT_MARK);
+        if (idx != -1) {
+            if (str.substring(0, idx).trim().length() == 0) {
+                return execPrinterCmdExecutor(printerFormatExecutor, str.substring(idx + FORMAT_MARK.length()), hsmpParam);
             }
-            int idx = str.indexOf(FORMAT_MARK);
-            if (idx != -1) {
-                if (str.substring(0, idx).trim().length() == 0) {
-                    return execPrinterCmdExecutor(printerFormatExecutor, str.substring(idx + FORMAT_MARK.length()), hsmpParam);
-                }
-            }
-        //}catch(Exception e){
-        //    Log.e("Print: ", "Error", e);
-        //}
+        }
         return execPrinterCmdExecutor(printerNormalExecutor, str, hsmpParam);
     }
 
@@ -274,16 +275,16 @@ public abstract class BasePrinter {
             {"\\\\", "\\"},
             {"\\r", "\r"},
             {"\\n", "\n"},
-            {"\\t", "\t"},
-    };
+            {"\\t", "\t"},};
 
     protected boolean normalPrint(String str, HashMap<String, String> hsmpParam) {
         return formatPrint("[FORMAT][RESET][TEXT]" + str, hsmpParam);
     }
 
     private boolean formatPrint(String str, HashMap<String, String> hsmpParam) {
-        if (StringUtils.isBlank(str))
+        if (StringUtils.isBlank(str)) {
             return true;
+        }
         if (hsmpParam != null) {
             if (hsmpParam.size() > 0) {
                 String[][] convert = new String[hsmpParam.size()][];
@@ -343,8 +344,9 @@ public abstract class BasePrinter {
                 }
                 text = StringUtils.convert(text, convert);
                 logger.debug(printerCmdExecutor.getClass().getName() + ":[" + text + "]");
-                if (!execPrinterCmdExecutor(printerCmdExecutor, text, hsmpParam))
+                if (!execPrinterCmdExecutor(printerCmdExecutor, text, hsmpParam)) {
                     return false;
+                }
             }
             return true;
         } else {
@@ -361,7 +363,7 @@ public abstract class BasePrinter {
 
     protected abstract boolean printText(String text);
 
-    protected abstract boolean printQRCode(String mode, String qrCode);
+    protected abstract boolean printQRCode(String mode, int size, String qrCode);
 
     protected abstract boolean printBarcode(String mode, String barcode);
 
@@ -375,9 +377,12 @@ public abstract class BasePrinter {
 
     protected abstract boolean cutPaper(String mode);
 
+    protected abstract boolean printBitmap(Bitmap bitmap);
+
     private boolean cmdModel(String str, HashMap<String, String> hsmpParam) {
-        if (StringUtils.isBlank(str))
+        if (StringUtils.isBlank(str)) {
             return true;
+        }
         HashMap<String, String> hsmpValue = StringUtils.toHashMap(str, ";", "=");
         String filename = hsmpValue.get("FILE");
         String resource = hsmpValue.get("RESOURCE");
@@ -395,16 +400,18 @@ public abstract class BasePrinter {
             if (file.isFile() && file.length() > 0) {
                 data = IOUtils.readFile(filename);
                 if (data != null) {
-                    if (data.length == 0)
+                    if (data.length == 0) {
                         data = null;
+                    }
                 }
             }
         }
         if (data == null && !StringUtils.isBlank(resource)) {
             data = IOUtils.readResource(resource);
             if (data != null) {
-                if (data.length == 0)
+                if (data.length == 0) {
                     data = null;
+                }
             }
         }
         return data;
@@ -415,8 +422,9 @@ public abstract class BasePrinter {
     }
 
     private boolean cmdSetting(String str) {
-        if (StringUtils.isBlank(str))
+        if (StringUtils.isBlank(str)) {
             return true;
+        }
         HashMap<String, String> hsmpSettings = StringUtils.toHashMap(str, ";", "=");
         if (hsmpSettings.size() > 0) {
             return setSettings(hsmpSettings);
@@ -425,8 +433,9 @@ public abstract class BasePrinter {
     }
 
     private boolean cmdBarcode(String str) {
-        if (StringUtils.isBlank(str))
+        if (StringUtils.isBlank(str)) {
             return true;
+        }
         int idx = str.indexOf(':');
         if (idx > 0) {
             String mode = str.substring(0, idx);
@@ -436,15 +445,21 @@ public abstract class BasePrinter {
         return true;
     }
 
-    //Changed from private to public
-    public boolean cmdQRCode(String str) {
-        if (StringUtils.isBlank(str))
+    private boolean cmdQRCode(String str) {
+        if (StringUtils.isBlank(str)) {
             return true;
+        }
         int idx = str.indexOf(':');
         if (idx > 0) {
             String mode = str.substring(0, idx);
+            int sizeDiv = mode.indexOf(",");
+            int size = 100;
+            if (sizeDiv > 0) {
+                size = Integer.parseInt(mode.substring(sizeDiv + 1));
+                mode = mode.substring(0, sizeDiv);
+            }
             String qrCode = str.substring(idx + 1);
-            return printQRCode(mode.trim(), qrCode);
+            return printQRCode(mode.trim(), size, qrCode);
         }
         return true;
     }
@@ -454,43 +469,50 @@ public abstract class BasePrinter {
     }
 
     private boolean cmdImage(String str) {
-        if (StringUtils.isBlank(str))
+        if (StringUtils.isBlank(str)) {
             return true;
+        }
         HashMap<String, String> hsmpValue = StringUtils.toHashMap(str, ";", "=");
         String filename = hsmpValue.get("FILE");
         String resource = hsmpValue.get("RESOURCE");
         String width = hsmpValue.get("WIDTH");
         String height = hsmpValue.get("HEIGHT");
-        if (filename != null || resource != null)
+        if (filename != null || resource != null) {
             return printImage(filename, resource, width, height);
+        }
         return true;
     }
 
     private boolean cmdTextImage(String str) {
-        if (StringUtils.isBlank(str))
+        if (StringUtils.isBlank(str)) {
             return true;
+        }
         return printTextImage(str);
     }
 
     private boolean cmdCode(String str) {
-        if (StringUtils.isBlank(str))
+        if (StringUtils.isBlank(str)) {
             return true;
+        }
         HashMap<String, String> hsmpValue = StringUtils.toHashMap(str, ";", "=");
         return formatPrint(execPrintCode(hsmpValue), null);
     }
 
     private boolean cmdText(String str) {
-        if (StringUtils.isEmpty(str))
+        if (StringUtils.isEmpty(str)) {
             return true;
+        }
         return printText(str);
     }
 
     private boolean cmdData(String str) {
-        if (StringUtils.isBlank(str))
+        if (StringUtils.isBlank(str)) {
             return true;
+        }
         HashMap<String, String> hsmpValue = StringUtils.toHashMap(str, ";", "=");
-        if (hsmpValue.size() == 0)
+        if (hsmpValue.size() == 0) {
             return true;
+        }
         String RADIX = hsmpValue.get("RADIX");
         String DIV = hsmpValue.get("DIV");
         if (DIV == null) {
@@ -501,8 +523,9 @@ public abstract class BasePrinter {
             DIV = " ";
         }
         int radix = 16;
-        if (!StringUtils.isBlank(RADIX))
+        if (!StringUtils.isBlank(RADIX)) {
             radix = Integer.parseInt(RADIX);
+        }
         String filename = hsmpValue.get("FILE");
         String resource = hsmpValue.get("RESOURCE");
         String value = null;
@@ -521,8 +544,9 @@ public abstract class BasePrinter {
             int dataLen = 0;
             for (int i = 0; i < items.length; i++) {
                 items[i] = items[i].trim();
-                if (items[i].length() == 0)
+                if (items[i].length() == 0) {
                     continue;
+                }
                 int n = Integer.valueOf(items[i], radix);
                 data[dataLen] = (byte) (n & 0xFF);
                 dataLen++;
@@ -535,8 +559,9 @@ public abstract class BasePrinter {
     }
 
     private boolean cmdCut(String str) {
-        if (StringUtils.isBlank(str))
+        if (StringUtils.isBlank(str)) {
             return cutPaper(null);
+        }
         return cutPaper(str.trim());
     }
 }

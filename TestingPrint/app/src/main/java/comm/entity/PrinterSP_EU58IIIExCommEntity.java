@@ -1,15 +1,5 @@
 package comm.entity;
 
-import android.graphics.Bitmap;
-import android.graphics.Canvas;
-import android.graphics.Color;
-import android.graphics.Paint;
-import android.graphics.drawable.BitmapDrawable;
-import android.graphics.drawable.Drawable;
-import android.util.Log;
-
-import com.google.code.microlog4android.Logger;
-
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -18,7 +8,15 @@ import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Locale;
+
+import android.graphics.Bitmap;
+import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.Paint;
+import android.graphics.Rect;
+import android.graphics.Paint.Style;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
 
 import android_serialport_api.SerialPort;
 import common.SysConfig;
@@ -31,7 +29,10 @@ import common.utils.EncryptUtils;
 import common.utils.IOUtils;
 import common.utils.StringUtils;
 
+import com.google.code.microlog4android.Logger;
+
 public class PrinterSP_EU58IIIExCommEntity extends BasePrinter {
+
     private final static Logger logger = Logger.getLogger("PrinterCommEntity");
     private SerialPort printerSerialPort = null;
     private FIFOQueue printerFIFOQueue = new FIFOQueue();
@@ -46,8 +47,6 @@ public class PrinterSP_EU58IIIExCommEntity extends BasePrinter {
 
     private int id;
     private CommEventListener commEventListener;
-
-    private static final Locale CL = new Locale("es", "CL");
 
     private static enum HardwareAlarmState {
         UNKNOWN, NORMAL, ALARM
@@ -75,16 +74,8 @@ public class PrinterSP_EU58IIIExCommEntity extends BasePrinter {
         synchronized (this) {
             try {
                 if (printerSerialPort == null) {
-                    String baudStr = SysConfig.get("COM.PRINTER" + id + ".BAND");
-                    String confPrinter = String.format(CL, "%s%d.%s", "COM.PRINTER", id, SysConfig.get("PLATFORM"));
-                    String device = SysConfig.get(confPrinter);
-                    //SysConfig.get("COM.PRINTER" + id + "." + SysConfig.get("PLATFORM"));
-                    //String device = SysConfig.get("COM.PRINTER1.arm");
-
-                    logger.info(String.format("PrinterSP_EU58IIIExCommEntity: %s : Dispositivo: %s Bauds: %s", confPrinter, device, baudStr));
-
-                    baud = Integer.parseInt(baudStr);
-                    printerSerialPort = new SerialPort(new File(device), baud, 0);
+                    baud = Integer.parseInt(SysConfig.get("COM.PRINTER" + id + ".BAND"));
+                    printerSerialPort = new SerialPort(new File(SysConfig.get("COM.PRINTER" + id + "." + SysConfig.get("PLATFORM"))), baud, 0);
                     paperState = HardwareAlarmState.UNKNOWN;
                     realPaperState = HardwareAlarmState.UNKNOWN;
                     printerState = HardwareAlarmState.UNKNOWN;
@@ -95,7 +86,6 @@ public class PrinterSP_EU58IIIExCommEntity extends BasePrinter {
                 }
             } catch (Exception e) {
                 //e.printStackTrace();
-                logger.error("PrinterSP_EU58IIIExCommEntity: Error al iniciar impresora", e);
             }
         }
     }
@@ -135,11 +125,11 @@ public class PrinterSP_EU58IIIExCommEntity extends BasePrinter {
             if ("enable".equalsIgnoreCase(cmd)) {
                 if (printerSerialPort != null
                         && realPaperState != HardwareAlarmState.ALARM
-                        && printerState != HardwareAlarmState.ALARM
-                        )
+                        && printerState != HardwareAlarmState.ALARM) {
                     return "TRUE";
-                else
+                } else {
                     return "FALSE";
+                }
             }
             if ("reset".equals(cmd)) {
                 printerFIFOQueue.reset();
@@ -165,10 +155,12 @@ public class PrinterSP_EU58IIIExCommEntity extends BasePrinter {
                 return null;
             }
             if ("state".equals(cmd)) {
-                if (realPaperState == HardwareAlarmState.NORMAL)
+                if (realPaperState == HardwareAlarmState.NORMAL) {
                     return "havePaper";
-                if (realPaperState == HardwareAlarmState.ALARM)
+                }
+                if (realPaperState == HardwareAlarmState.ALARM) {
                     return "noPaper";
+                }
                 return "unknown";
             }
         } catch (Exception e) {
@@ -185,8 +177,9 @@ public class PrinterSP_EU58IIIExCommEntity extends BasePrinter {
 
     private boolean sendData(byte[] data, int pos, int len) {
         try {
-            if (printerSerialPort == null)
+            if (printerSerialPort == null) {
                 return false;
+            }
             int page = 14 + 384 * 3;
             long lPrinterTime = 1000;
             if (!StringUtils.isBlank(SysConfig.get("PRINTER.SPEEDTIME"))) {
@@ -197,8 +190,9 @@ public class PrinterSP_EU58IIIExCommEntity extends BasePrinter {
                 int count = 0;
                 while (count < len) {
                     int n = len - count;
-                    if (n > page)
+                    if (n > page) {
                         n = page;
+                    }
                     long delayMillisecond = lPrinterTime * n / (baud / 12);
                     long lStartTime = System.currentTimeMillis();
                     os.write(data, pos + count, n);
@@ -242,23 +236,26 @@ public class PrinterSP_EU58IIIExCommEntity extends BasePrinter {
         bufferState[0] = (byte) 0x10;
         bufferState[1] = (byte) 0x04;
         bufferState[2] = (byte) 0x04;
-        if (!sendData(bufferState))
+        if (!sendData(bufferState)) {
             return;
+        }
         printerFIFOQueue.pop(2000);
     }
 
     boolean logRecvEnable = false;
 
     private void execPaperState() {
-        if (!checkStateEnable)
+        if (!checkStateEnable) {
             return;
+        }
         byte[] bufferState = new byte[3];
         bufferState[0] = (byte) 0x10;
         bufferState[1] = (byte) 0x04;
         bufferState[2] = (byte) 0x04;
         long lStartTime = System.currentTimeMillis();
-        if (!sendData(bufferState))
+        if (!sendData(bufferState)) {
             return;
+        }
         logRecvEnable = false;
         Object obj = printerFIFOQueue.pop(1000);
         long lEndTime = System.currentTimeMillis();
@@ -286,8 +283,9 @@ public class PrinterSP_EU58IIIExCommEntity extends BasePrinter {
         } else {
             realPaperState = HardwareAlarmState.ALARM;
             if (paperState != HardwareAlarmState.ALARM) {
-                if (lHasNoPaper == 0)
+                if (lHasNoPaper == 0) {
                     lHasNoPaper = System.currentTimeMillis();
+                }
                 long lTime = System.currentTimeMillis();
                 if ((lHasNoPaperDelayCheck + lHasNoPaper) < lTime) {
                     paperState = HardwareAlarmState.ALARM;
@@ -323,6 +321,7 @@ public class PrinterSP_EU58IIIExCommEntity extends BasePrinter {
     }
 
     private class RecvThread extends Thread {
+
         public void run() {
             InputStream is = printerSerialPort.getInputStream();
             byte[] buffer = new byte[1];
@@ -352,12 +351,14 @@ public class PrinterSP_EU58IIIExCommEntity extends BasePrinter {
     }
 
     private class InitThread extends Thread {
+
         public void run() {
             checkPaperState();
         }
     }
 
     private static class PrinterCmdExecutorInfo {
+
         PrinterCmdExecutor printerCmdExecutor;
         String str;
         HashMap<String, String> hsmpParam;
@@ -412,14 +413,19 @@ public class PrinterSP_EU58IIIExCommEntity extends BasePrinter {
 
     @Override
     protected boolean setSettings(HashMap<String, String> hsmpSettings) {
-        if (hsmpSettings == null)
+        if (hsmpSettings == null) {
             return true;
+        }
         String val = null;
         byte b = 0;
         val = hsmpSettings.get(PrinterOptions.SETTINGS_STRONG);
         if (val != null) {
-            if ("Y".equalsIgnoreCase(val)) b = 1;
-            if ("N".equalsIgnoreCase(val)) b = 0;
+            if ("Y".equalsIgnoreCase(val)) {
+                b = 1;
+            }
+            if ("N".equalsIgnoreCase(val)) {
+                b = 0;
+            }
             byte[] bufferCmd = new byte[3];
             bufferCmd[0] = 0x1B;
             bufferCmd[1] = 0x45;
@@ -443,8 +449,7 @@ public class PrinterSP_EU58IIIExCommEntity extends BasePrinter {
             XYSize = (byte) ((XYSize & 0x0F) | (((size - 1) << 4) & 0xF0));
         }
         if (!StringUtils.isBlank(hsmpSettings.get(PrinterOptions.SETTINGS_HIGHSIZE))
-                || !StringUtils.isBlank(hsmpSettings.get(PrinterOptions.SETTINGS_WIDESIZE))
-                ) {
+                || !StringUtils.isBlank(hsmpSettings.get(PrinterOptions.SETTINGS_WIDESIZE))) {
             byte[] bufferCmd = new byte[3];
             bufferCmd[0] = 0x1D;
             bufferCmd[1] = 0x21;
@@ -453,8 +458,12 @@ public class PrinterSP_EU58IIIExCommEntity extends BasePrinter {
         }
         val = hsmpSettings.get(PrinterOptions.SETTINGS_UNDERLINE);
         if (val != null) {
-            if ("Y".equalsIgnoreCase(val)) b = 1;
-            if ("N".equalsIgnoreCase(val)) b = 0;
+            if ("Y".equalsIgnoreCase(val)) {
+                b = 1;
+            }
+            if ("N".equalsIgnoreCase(val)) {
+                b = 0;
+            }
             byte[] bufferCmd = new byte[3];
             bufferCmd[0] = 0x1B;
             bufferCmd[1] = 0x2D;
@@ -500,12 +509,14 @@ public class PrinterSP_EU58IIIExCommEntity extends BasePrinter {
 
     protected boolean setColor(String color) {
         if (this.color != null) {
-            if (this.color.equalsIgnoreCase(color))
+            if (this.color.equalsIgnoreCase(color)) {
                 return true;
+            }
         }
         byte b = 0;
-        if (!PrinterOptions.COLOR_BLACK.equalsIgnoreCase(color))
+        if (!PrinterOptions.COLOR_BLACK.equalsIgnoreCase(color)) {
             b = 1;
+        }
         byte[] bufferCmd = new byte[3];
         bufferCmd[0] = 0x1D;
         bufferCmd[1] = 0x42;
@@ -579,8 +590,9 @@ public class PrinterSP_EU58IIIExCommEntity extends BasePrinter {
             }
             sb.append(cc);
         }
-        if (sb.length() > 0)
+        if (sb.length() > 0) {
             list.add(sb.toString());
+        }
         return list;
     }
 
@@ -594,10 +606,11 @@ public class PrinterSP_EU58IIIExCommEntity extends BasePrinter {
         for (int i = 0; i < 2; i++) {
             try {
                 byte[] data = null;
-                if (charset == null)
+                if (charset == null) {
                     data = text.getBytes();
-                else
+                } else {
                     data = text.getBytes(charset);
+                }
                 sendData(data);
                 break;
             } catch (Exception e) {
@@ -608,7 +621,7 @@ public class PrinterSP_EU58IIIExCommEntity extends BasePrinter {
     }
 
     @Override
-    protected boolean printQRCode(String mode, String qrCode) {
+    protected boolean printQRCode(String mode, int size, String qrCode) {
         reset();
         byte v = 0, r = 0;
         byte t = 0;
@@ -664,58 +677,67 @@ public class PrinterSP_EU58IIIExCommEntity extends BasePrinter {
         byte[] data = null;
         if ("UPC-A".equalsIgnoreCase(mode)) {
             barcode = barcode.trim();
-            if (barcode.length() < 11 || barcode.length() > 12)
+            if (barcode.length() < 11 || barcode.length() > 12) {
                 return true;
+            }
             m = 65;
             data = barcode.getBytes();
         } else if ("UPC-E".equalsIgnoreCase(mode)) {
             barcode = barcode.trim();
-            if (barcode.length() < 11 || barcode.length() > 12)
+            if (barcode.length() < 11 || barcode.length() > 12) {
                 return true;
+            }
             m = 66;
             data = barcode.getBytes();
         } else if ("EAN13".equalsIgnoreCase(mode) || "JAN13".equalsIgnoreCase(mode)) {
             barcode = barcode.trim();
-            if (barcode.length() < 12 || barcode.length() > 13)
+            if (barcode.length() < 12 || barcode.length() > 13) {
                 return true;
+            }
             m = 67;
             data = barcode.getBytes();
         } else if ("EAN8".equalsIgnoreCase(mode) || "JAN8".equalsIgnoreCase(mode)) {
             barcode = barcode.trim();
-            if (barcode.length() < 7 || barcode.length() > 8)
+            if (barcode.length() < 7 || barcode.length() > 8) {
                 return true;
+            }
             m = 68;
             data = barcode.getBytes();
         } else if ("CODE39".equalsIgnoreCase(mode)) {
             barcode = barcode.trim();
-            if (barcode.length() < 1 || barcode.length() > 253)
+            if (barcode.length() < 1 || barcode.length() > 253) {
                 return true;
+            }
             String newBarcode = "*" + barcode + "*";
             m = 69;
             data = newBarcode.getBytes();
         } else if ("ITF".equalsIgnoreCase(mode)) {
             barcode = barcode.trim();
-            if (barcode.length() < 1 || barcode.length() > 255)
+            if (barcode.length() < 1 || barcode.length() > 255) {
                 return true;
+            }
             m = 70;
             data = barcode.getBytes();
         } else if ("CODABAR".equalsIgnoreCase(mode)) {
             barcode = barcode.trim();
-            if (barcode.length() < 1 || barcode.length() > 255)
+            if (barcode.length() < 1 || barcode.length() > 255) {
                 return true;
+            }
             m = 71;
             data = barcode.getBytes();
         } else if ("CODE93".equalsIgnoreCase(mode)) {
             barcode = barcode.trim();
-            if (barcode.length() < 1 || barcode.length() > 255)
+            if (barcode.length() < 1 || barcode.length() > 255) {
                 return true;
+            }
             m = 72;
             data = barcode.getBytes();
         } else if ("CODE128".equalsIgnoreCase(mode)) {
             barcode = barcode.trim();
             String newBarcode = StringUtils.replace(barcode, "{", "{{");
-            if (newBarcode.length() < 2 || newBarcode.length() > 253)
+            if (newBarcode.length() < 2 || newBarcode.length() > 253) {
                 return true;
+            }
             newBarcode = "{B" + newBarcode;
             m = 73;
             data = newBarcode.getBytes();
@@ -778,8 +800,9 @@ public class PrinterSP_EU58IIIExCommEntity extends BasePrinter {
                 }
             } else {
                 fw = pfw;
-                if (pfh > 0)
+                if (pfh > 0) {
                     fh = pfh;
+                }
             }
             Drawable drawable = null;
             if (!StringUtils.isBlank(filename)) {
@@ -804,7 +827,6 @@ public class PrinterSP_EU58IIIExCommEntity extends BasePrinter {
                 drawable.setBounds(0, 0, bitmap.getWidth(), bitmap.getHeight());
                 drawable.draw(canvas);
 
-                List<byte[]> listData = bitmap2printerdata(bitmap);
                 /*
                 int h = bitmap.getHeight();
 				int w = bitmap.getWidth();
@@ -823,9 +845,10 @@ public class PrinterSP_EU58IIIExCommEntity extends BasePrinter {
 					}
 				}
 				saveBitmap("/sdcard/mybmp.bmp",bitmap);
-				*/
+                 */
+                boolean res = printBitmap(bitmap);
                 bitmap.recycle();
-                printImage(listData);
+                return res;
             }
         } catch (Exception e) {
         } finally {
@@ -875,8 +898,9 @@ public class PrinterSP_EU58IIIExCommEntity extends BasePrinter {
                     break;
                 }
             }
-            if (isPrinted)
+            if (isPrinted) {
                 break;
+            }
             rlen--;
         }
         int nl = rlen & 0x0FF;
@@ -911,8 +935,7 @@ public class PrinterSP_EU58IIIExCommEntity extends BasePrinter {
                         int color = bitmap.getPixel(x, rr + y) & 0xFFFFFFFF;
                         if ((color & 0xFF0000) > 0x800000
                                 && (color & 0x00FF00) > 0x008000
-                                && (color & 0x0000FF) > 0x000080
-                                ) {
+                                && (color & 0x0000FF) > 0x000080) {
                             val = 0;
                         } else {
                             val = 1;
@@ -951,7 +974,9 @@ public class PrinterSP_EU58IIIExCommEntity extends BasePrinter {
     @Override
     protected boolean cutPaper(String mode) {
         byte b = 0;
-        if (PrinterOptions.CUT_HALF.equalsIgnoreCase(mode)) b = 1;
+        if (PrinterOptions.CUT_HALF.equalsIgnoreCase(mode)) {
+            b = 1;
+        }
 
         byte[] bufferCut = new byte[3];
         bufferCut[0] = (byte) 0x1D;
@@ -1036,10 +1061,23 @@ public class PrinterSP_EU58IIIExCommEntity extends BasePrinter {
         if (!StringUtils.isBlank(FONTSIZE)) {
             fontSize = Integer.parseInt(FONTSIZE);
         }
+        if (fontSize < 16) {
+            fontSize = 16;
+        }
         int fw = IMAGE_MAX_WIDTH;
-        int fh = fontSize + 8;
+        int fh = fontSize + 16;
         int pfw = 0;
         int pfh = 0;
+        int offx = 0;
+        int offy = 0;
+
+        if (!StringUtils.isBlank(X)) {
+            offx = Integer.parseInt(X);
+        }
+        if (!StringUtils.isBlank(Y)) {
+            offy = Integer.parseInt(Y);
+        }
+        List<String> formattedText = null;
 
         if (!StringUtils.isBlank(WIDTH)) {
             pfw = Integer.parseInt(WIDTH);
@@ -1048,6 +1086,7 @@ public class PrinterSP_EU58IIIExCommEntity extends BasePrinter {
             pfh = Integer.parseInt(HEIGHT);
         }
         Bitmap bitmap = null;
+        Canvas canvas = null;
         if (!StringUtils.isBlank(filename) || !StringUtils.isBlank(resource)) {
             Drawable drawable = null;
             InputStream is = null;
@@ -1072,9 +1111,9 @@ public class PrinterSP_EU58IIIExCommEntity extends BasePrinter {
                         fw = pfw;
                         fh = pfh;
                     }
-
+                    formattedText = getFormattedText(str, (fw - offx) / (fontSize / 2));
                     bitmap = Bitmap.createBitmap(fw, fh, Bitmap.Config.ARGB_4444);
-                    Canvas canvas = new Canvas(bitmap);
+                    canvas = new Canvas(bitmap);
                     drawable.setBounds(0, 0, bitmap.getWidth(), bitmap.getHeight());
                     drawable.draw(canvas);
                 }
@@ -1083,18 +1122,23 @@ public class PrinterSP_EU58IIIExCommEntity extends BasePrinter {
             }
         }
         if (bitmap == null) {
+            formattedText = getFormattedText(str, (fw - offx) / (fontSize / 2));
+            fh = fontSize * formattedText.size();
             bitmap = Bitmap.createBitmap(fw, fh, Bitmap.Config.ARGB_4444);
             int initColor = Color.WHITE;
             if (PrinterOptions.COLOR_WHITE.equalsIgnoreCase(color)) {
                 initColor = Color.BLACK;
             }
-            for (int c = 0; c < fw; c++) {
-                for (int r = 0; r < fh; r++) {
-                    bitmap.setPixel(c, r, initColor);
-                }
-            }
+            canvas = new Canvas(bitmap);
+            Paint paint = new Paint();
+            Style style = Style.FILL;
+            paint.setColor(initColor);
+            paint.setStyle(style);
+            canvas.drawRect(new Rect(0, 0, fw, fh), paint);
         }
-        Canvas canvas = new Canvas(bitmap);
+        if (canvas == null) {
+            canvas = new Canvas(bitmap);
+        }
         Paint paint = new Paint();
         paint.setTextSize(fontSize);
         if (PrinterOptions.COLOR_WHITE.equalsIgnoreCase(color)) {
@@ -1104,21 +1148,34 @@ public class PrinterSP_EU58IIIExCommEntity extends BasePrinter {
         }
         int x = 0;
         int y = fontSize;
-        if (!StringUtils.isBlank(X)) {
-            x = Integer.parseInt(X);
+
+        if (PrinterOptions.ALIGN_RIGHT.equalsIgnoreCase(align)) {
+            int maxBytes = (fw - offx) / (fontSize / 2);
+            y = fontSize + offy;
+            for (int i = 0; i < formattedText.size(); i++) {
+                int bytes = formattedText.get(i).getBytes().length;
+                x = offx + (maxBytes - bytes) * (fontSize / 2);
+                canvas.drawText(formattedText.get(i), x, y, paint);
+                y += fontSize;
+            }
+        } else if (PrinterOptions.ALIGN_CENTER.equalsIgnoreCase(align)) {
+            int maxBytes = (fw - offx) / (fontSize / 2);
+            y = fontSize + offy;
+            for (int i = 0; i < formattedText.size(); i++) {
+                String s = formattedText.get(i).trim();
+                int bytes = s.getBytes().length;
+                x = offx + (maxBytes - bytes) * (fontSize / 2) / 2;
+                canvas.drawText(s, x, y, paint);
+                y += fontSize;
+            }
         } else {
-            int textLen = str.getBytes().length;
-            if (PrinterOptions.ALIGN_RIGHT.equalsIgnoreCase(align)) {
-                x = fw - fontSize * textLen / 2;
-            }
-            if (PrinterOptions.ALIGN_CENTER.equalsIgnoreCase(align)) {
-                x = (fw - fontSize * textLen / 2) / 2;
+            x = offx;
+            y = fontSize + offy;
+            for (int i = 0; i < formattedText.size(); i++) {
+                canvas.drawText(formattedText.get(i), x, y, paint);
+                y += fontSize;
             }
         }
-        if (!StringUtils.isBlank(Y)) {
-            y = Integer.parseInt(Y);
-        }
-        canvas.drawText(str, x, y, paint);
 
         if (fw > IMAGE_MAX_WIDTH) {
             int dw = bitmap.getWidth();
@@ -1135,9 +1192,47 @@ public class PrinterSP_EU58IIIExCommEntity extends BasePrinter {
             bitmap.recycle();
             bitmap = tBitmap;
         }
-        List<byte[]> listData = bitmap2printerdata(bitmap);
+        boolean res = printBitmap(bitmap);
         bitmap.recycle();
-        return printImage(listData);
+        return res;
+    }
+
+    private List<String> getFormattedText(String str, int lineChars) {
+        List<String> listText = new ArrayList<String>();
+        str = StringUtils.replace(StringUtils.replace(str, "\r\n", "\n"), "\r", "\n");
+        String[] lines = str.split("\n");
+        StringBuffer sb = new StringBuffer();
+        for (int i = 0; i < lines.length; i++) {
+            String[] ts = lines[i].split(" ");
+            for (int j = 0; j < ts.length; j++) {
+                String blank = "";
+                if ((j + 1) < ts.length) {
+                    blank = " ";
+                }
+                int len = 0;
+                if (ts[j] == null) {
+                    len = 0;
+                } else {
+                    len = ts[j].getBytes().length;
+                }
+                if ((sb.length() + len) == lineChars) {
+                    sb.append(ts[j]);
+                    listText.add(sb.toString());
+                    sb.setLength(0);
+                } else if ((sb.length() + len) < lineChars) {
+                    sb.append(ts[j] + blank);
+                } else {
+                    listText.add(sb.toString());
+                    sb.setLength(0);
+                    sb.append(ts[j] + blank);
+                }
+            }
+            if (sb.length() > 0) {
+                listText.add(sb.toString());
+                sb.setLength(0);
+            }
+        }
+        return listText;
     }
 
     @Override
@@ -1185,5 +1280,11 @@ public class PrinterSP_EU58IIIExCommEntity extends BasePrinter {
             text = sb.toString();
         }
         return text;
+    }
+
+    @Override
+    protected boolean printBitmap(Bitmap bitmap) {
+        List<byte[]> listData = bitmap2printerdata(bitmap);
+        return printImage(listData);
     }
 }

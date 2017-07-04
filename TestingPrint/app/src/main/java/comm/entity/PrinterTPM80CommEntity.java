@@ -1,21 +1,5 @@
 package comm.entity;
 
-import android.graphics.Bitmap;
-import android.graphics.Bitmap.Config;
-import android.graphics.Canvas;
-import android.graphics.Color;
-import android.graphics.Paint;
-import android.graphics.Paint.Style;
-import android.graphics.Rect;
-import android.graphics.drawable.BitmapDrawable;
-import android.graphics.drawable.Drawable;
-import android.util.Log;
-
-import com.google.zxing.BarcodeFormat;
-import com.google.zxing.EncodeHintType;
-import com.google.zxing.MultiFormatWriter;
-import com.google.zxing.common.BitMatrix;
-
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -26,7 +10,24 @@ import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.List;
 
+import android.graphics.Bitmap;
+import android.graphics.Bitmap.Config;
+import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.Paint;
+import android.graphics.Paint.Style;
+import android.graphics.Rect;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
+
 import android_serialport_api.SerialPort;
+
+import com.google.code.microlog4android.Logger;
+import com.google.zxing.BarcodeFormat;
+import com.google.zxing.EncodeHintType;
+import com.google.zxing.MultiFormatWriter;
+import com.google.zxing.common.BitMatrix;
+
 import common.SysConfig;
 import common.SysGlobal;
 import common.json.JSONUtils;
@@ -39,8 +40,7 @@ import common.utils.StringUtils;
 
 public class PrinterTPM80CommEntity extends BasePrinter {
 
-    private static final long serialVersionUID = 5648728896932203520L;
-
+    private final static Logger logger = Logger.getLogger("PrinterCommEntity");
     private SerialPort printerSerialPort = null;
     private FIFOQueue printerFIFOQueue = new FIFOQueue();
     private HardwareAlarmState paperState = HardwareAlarmState.UNKNOWN;
@@ -54,8 +54,6 @@ public class PrinterTPM80CommEntity extends BasePrinter {
 
     private int id;
     private CommEventListener commEventListener;
-
-    private static final String TAG = "PrinterTPM80CommEntity";
 
     private static enum HardwareAlarmState {
         UNKNOWN, NORMAL, ALARM
@@ -134,11 +132,11 @@ public class PrinterTPM80CommEntity extends BasePrinter {
             if ("enable".equalsIgnoreCase(cmd)) {
                 if (printerSerialPort != null
                         && realPaperState != HardwareAlarmState.ALARM
-                        && printerState != HardwareAlarmState.ALARM
-                        )
+                        && printerState != HardwareAlarmState.ALARM) {
                     return "TRUE";
-                else
+                } else {
                     return "FALSE";
+                }
             }
             if ("reset".equals(cmd)) {
                 printerFIFOQueue.reset();
@@ -164,10 +162,12 @@ public class PrinterTPM80CommEntity extends BasePrinter {
                 return null;
             }
             if ("state".equals(cmd)) {
-                if (realPaperState == HardwareAlarmState.NORMAL)
+                if (realPaperState == HardwareAlarmState.NORMAL) {
                     return "havePaper";
-                if (realPaperState == HardwareAlarmState.ALARM)
+                }
+                if (realPaperState == HardwareAlarmState.ALARM) {
                     return "noPaper";
+                }
                 return "unknown";
             }
         } catch (Exception e) {
@@ -184,8 +184,9 @@ public class PrinterTPM80CommEntity extends BasePrinter {
 
     private boolean sendData(byte[] data, int pos, int len) {
         try {
-            if (printerSerialPort == null)
+            if (printerSerialPort == null) {
                 return false;
+            }
             int page = 14 + 384 * 3;
             long lPrinterTime = 1000;
             if (!StringUtils.isBlank(SysConfig.get("PRINTER.SPEEDTIME"))) {
@@ -196,8 +197,9 @@ public class PrinterTPM80CommEntity extends BasePrinter {
                 int count = 0;
                 while (count < len) {
                     int n = len - count;
-                    if (n > page)
+                    if (n > page) {
                         n = page;
+                    }
                     long delayMillisecond = lPrinterTime * n / (baud / 12);
                     long lStartTime = System.currentTimeMillis();
                     os.write(data, pos + count, n);
@@ -248,28 +250,30 @@ public class PrinterTPM80CommEntity extends BasePrinter {
 		if(!sendData(bufferState))
 			return;
 		printerFIFOQueue.pop(2000);
-		*/
+         */
     }
 
     boolean logRecvEnable = false;
 
     private void execPaperState() {
-        if (!checkStateEnable)
+        if (!checkStateEnable) {
             return;
+        }
         byte[] bufferState = new byte[3];
         bufferState[0] = (byte) 0x10;
         bufferState[1] = (byte) 0x04;
         bufferState[2] = (byte) 0x04;
         long lStartTime = System.currentTimeMillis();
-        if (!sendData(bufferState))
+        if (!sendData(bufferState)) {
             return;
+        }
         logRecvEnable = false;
         Object obj = printerFIFOQueue.pop(1000);
         long lEndTime = System.currentTimeMillis();
         if (obj == null) {
             logRecvEnable = true;
             errorTimes++;
-            Log.d(TAG, "State CMD:" + EncryptUtils.byte2hex(bufferState) + ";OOT:" + (lEndTime - lStartTime) + "ms");
+            logger.debug("State CMD:" + EncryptUtils.byte2hex(bufferState) + ";OOT:" + (lEndTime - lStartTime) + "ms");
             monitorError();
             return;
         }
@@ -285,13 +289,14 @@ public class PrinterTPM80CommEntity extends BasePrinter {
                 hsmpParam.put("type", "PRINTER_NO_PAPER_RECOVERY");
                 hsmpParam.put("data", "" + id);
                 raiseEvent(hsmpParam);
-                Log.d(TAG, "Alarm recovery;CMD:" + EncryptUtils.byte2hex(bufferState) + ";RECV:" + EncryptUtils.byte2hex(new byte[]{bState}));
+                logger.debug("Alarm recovery;CMD:" + EncryptUtils.byte2hex(bufferState) + ";RECV:" + EncryptUtils.byte2hex(new byte[]{bState}));
             }
         } else {
             realPaperState = HardwareAlarmState.ALARM;
             if (paperState != HardwareAlarmState.ALARM) {
-                if (lHasNoPaper == 0)
+                if (lHasNoPaper == 0) {
                     lHasNoPaper = System.currentTimeMillis();
+                }
                 long lTime = System.currentTimeMillis();
                 if ((lHasNoPaperDelayCheck + lHasNoPaper) < lTime) {
                     paperState = HardwareAlarmState.ALARM;
@@ -299,7 +304,7 @@ public class PrinterTPM80CommEntity extends BasePrinter {
                     hsmpParam.put("type", "PRINTER_NO_PAPER");
                     hsmpParam.put("data", "" + id);
                     raiseEvent(hsmpParam);
-                    Log.d(TAG, "Alarm raise;CMD:" + EncryptUtils.byte2hex(bufferState) + ";RECV:" + EncryptUtils.byte2hex(new byte[]{bState}));
+                    logger.debug("Alarm raise;CMD:" + EncryptUtils.byte2hex(bufferState) + ";RECV:" + EncryptUtils.byte2hex(new byte[]{bState}));
                 }
             }
         }
@@ -327,6 +332,7 @@ public class PrinterTPM80CommEntity extends BasePrinter {
     }
 
     private class RecvThread extends Thread {
+
         public void run() {
             InputStream is = printerSerialPort.getInputStream();
             byte[] buffer = new byte[1];
@@ -336,7 +342,7 @@ public class PrinterTPM80CommEntity extends BasePrinter {
                     int readlen = is.read(buffer);
                     if (readlen > 0) {
                         if (logRecvEnable) {
-                            Log.d(TAG, "Printer RECV:" + EncryptUtils.byte2hex(buffer, 0, 1));
+                            logger.debug("Printer RECV:" + EncryptUtils.byte2hex(buffer, 0, 1));
                         }
                         errorTimes = 0;
                         monitorError();
@@ -356,12 +362,14 @@ public class PrinterTPM80CommEntity extends BasePrinter {
     }
 
     private class InitThread extends Thread {
+
         public void run() {
             checkPaperState();
         }
     }
 
     private static class PrinterCmdExecutorInfo {
+
         PrinterCmdExecutor printerCmdExecutor;
         String str;
         HashMap<String, String> hsmpParam;
@@ -416,14 +424,19 @@ public class PrinterTPM80CommEntity extends BasePrinter {
 
     @Override
     protected boolean setSettings(HashMap<String, String> hsmpSettings) {
-        if (hsmpSettings == null)
+        if (hsmpSettings == null) {
             return true;
+        }
         String val = null;
         byte b = 0;
         val = hsmpSettings.get(PrinterOptions.SETTINGS_STRONG);
         if (val != null) {
-            if ("Y".equalsIgnoreCase(val)) b = 1;
-            if ("N".equalsIgnoreCase(val)) b = 0;
+            if ("Y".equalsIgnoreCase(val)) {
+                b = 1;
+            }
+            if ("N".equalsIgnoreCase(val)) {
+                b = 0;
+            }
             byte[] bufferCmd = new byte[3];
             bufferCmd[0] = 0x1B;
             bufferCmd[1] = 0x45;
@@ -447,8 +460,7 @@ public class PrinterTPM80CommEntity extends BasePrinter {
             XYSize = (byte) ((XYSize & 0x0F) | (((size - 1) << 4) & 0xF0));
         }
         if (!StringUtils.isBlank(hsmpSettings.get(PrinterOptions.SETTINGS_HIGHSIZE))
-                || !StringUtils.isBlank(hsmpSettings.get(PrinterOptions.SETTINGS_WIDESIZE))
-                ) {
+                || !StringUtils.isBlank(hsmpSettings.get(PrinterOptions.SETTINGS_WIDESIZE))) {
             byte[] bufferCmd = new byte[3];
             bufferCmd[0] = 0x1D;
             bufferCmd[1] = 0x21;
@@ -457,8 +469,12 @@ public class PrinterTPM80CommEntity extends BasePrinter {
         }
         val = hsmpSettings.get(PrinterOptions.SETTINGS_UNDERLINE);
         if (val != null) {
-            if ("Y".equalsIgnoreCase(val)) b = 1;
-            if ("N".equalsIgnoreCase(val)) b = 0;
+            if ("Y".equalsIgnoreCase(val)) {
+                b = 1;
+            }
+            if ("N".equalsIgnoreCase(val)) {
+                b = 0;
+            }
             byte[] bufferCmd = new byte[3];
             bufferCmd[0] = 0x1B;
             bufferCmd[1] = 0x2D;
@@ -508,19 +524,21 @@ public class PrinterTPM80CommEntity extends BasePrinter {
      */
     protected boolean setColor(String color) {
         if (this.color != null) {
-            if (this.color.equalsIgnoreCase(color))
+            if (this.color.equalsIgnoreCase(color)) {
                 return true;
+            }
         }
         byte b = 0;
-        if (!PrinterOptions.COLOR_BLACK.equalsIgnoreCase(color))
+        if (!PrinterOptions.COLOR_BLACK.equalsIgnoreCase(color)) {
             b = 1;
+        }
         /*
-        byte[] bufferCmd = new byte[3];
+		byte[] bufferCmd = new byte[3];
 		bufferCmd[0] = 0x1D;
 		bufferCmd[1] = 0x42;
 		bufferCmd[2] = b;
 		sendData(bufferCmd);
-		*/
+         */
         this.color = color;
         return true;
     }
@@ -589,8 +607,9 @@ public class PrinterTPM80CommEntity extends BasePrinter {
             }
             sb.append(cc);
         }
-        if (sb.length() > 0)
+        if (sb.length() > 0) {
             list.add(sb.toString());
+        }
         return list;
     }
 
@@ -604,10 +623,11 @@ public class PrinterTPM80CommEntity extends BasePrinter {
         for (int i = 0; i < 2; i++) {
             try {
                 byte[] data = null;
-                if (charset == null)
+                if (charset == null) {
                     data = text.getBytes();
-                else
+                } else {
                     data = text.getBytes(charset);
+                }
                 sendData(data);
                 break;
             } catch (Exception e) {
@@ -618,24 +638,36 @@ public class PrinterTPM80CommEntity extends BasePrinter {
     }
 
     @Override
-    protected boolean printQRCode(String mode, String qrCode) {
-        int width = 100;
-        int height = 100;
+    protected boolean printQRCode(String mode, int size, String qrCode) {
+        if (size > IMAGE_MAX_WIDTH) {
+            size = IMAGE_MAX_WIDTH;
+        }
+        if (size < 50) {
+            size = 50;
+        }
+        int width = size;
+        int height = size;
+        int offx = (IMAGE_MAX_WIDTH - size) / 2;
         Hashtable<EncodeHintType, String> hints = new Hashtable<EncodeHintType, String>();
         hints.put(EncodeHintType.CHARACTER_SET, "utf-8");
         try {
             BarcodeFormat bf = BarcodeFormat.QR_CODE;
 
             BitMatrix bitMatrix = new MultiFormatWriter().encode(qrCode, bf, width, height, hints);
-            Bitmap bitmap = Bitmap.createBitmap(width, height, Config.ARGB_4444);
-            for (int x = 0; x < width; x++) {
+            int bmpwidth = (width + offx);
+            Bitmap bitmap = Bitmap.createBitmap(bmpwidth, height, Config.ARGB_4444);
+            for (int x = 0; x < bmpwidth; x++) {
                 for (int y = 0; y < height; y++) {
-                    bitmap.setPixel(x, y, bitMatrix.get(x, y) ? Color.BLACK : Color.WHITE);
+                    if (x < offx) {
+                        bitmap.setPixel(x, y, Color.WHITE);
+                    } else {
+                        bitmap.setPixel(x, y, bitMatrix.get(x - offx, y) ? Color.BLACK : Color.WHITE);
+                    }
                 }
             }
-            List<byte[]> listData = bitmap2printerdata(bitmap);
+            boolean res = printBitmap(bitmap);
             bitmap.recycle();
-            return printImage(listData);
+            return res;
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -650,58 +682,67 @@ public class PrinterTPM80CommEntity extends BasePrinter {
         byte[] data = null;
         if ("UPC-A".equalsIgnoreCase(mode)) {
             barcode = barcode.trim();
-            if (barcode.length() < 11 || barcode.length() > 12)
+            if (barcode.length() < 11 || barcode.length() > 12) {
                 return true;
+            }
             m = 65;
             data = barcode.getBytes();
         } else if ("UPC-E".equalsIgnoreCase(mode)) {
             barcode = barcode.trim();
-            if (barcode.length() < 11 || barcode.length() > 12)
+            if (barcode.length() < 11 || barcode.length() > 12) {
                 return true;
+            }
             m = 66;
             data = barcode.getBytes();
         } else if ("EAN13".equalsIgnoreCase(mode) || "JAN13".equalsIgnoreCase(mode)) {
             barcode = barcode.trim();
-            if (barcode.length() < 12 || barcode.length() > 13)
+            if (barcode.length() < 12 || barcode.length() > 13) {
                 return true;
+            }
             m = 67;
             data = barcode.getBytes();
         } else if ("EAN8".equalsIgnoreCase(mode) || "JAN8".equalsIgnoreCase(mode)) {
             barcode = barcode.trim();
-            if (barcode.length() < 7 || barcode.length() > 8)
+            if (barcode.length() < 7 || barcode.length() > 8) {
                 return true;
+            }
             m = 68;
             data = barcode.getBytes();
         } else if ("CODE39".equalsIgnoreCase(mode)) {
             barcode = barcode.trim();
-            if (barcode.length() < 1 || barcode.length() > 253)
+            if (barcode.length() < 1 || barcode.length() > 253) {
                 return true;
+            }
             String newBarcode = "*" + barcode + "*";
             m = 69;
             data = newBarcode.getBytes();
         } else if ("ITF".equalsIgnoreCase(mode)) {
             barcode = barcode.trim();
-            if (barcode.length() < 1 || barcode.length() > 255)
+            if (barcode.length() < 1 || barcode.length() > 255) {
                 return true;
+            }
             m = 70;
             data = barcode.getBytes();
         } else if ("CODABAR".equalsIgnoreCase(mode)) {
             barcode = barcode.trim();
-            if (barcode.length() < 1 || barcode.length() > 255)
+            if (barcode.length() < 1 || barcode.length() > 255) {
                 return true;
+            }
             m = 71;
             data = barcode.getBytes();
         } else if ("CODE93".equalsIgnoreCase(mode)) {
             barcode = barcode.trim();
-            if (barcode.length() < 1 || barcode.length() > 255)
+            if (barcode.length() < 1 || barcode.length() > 255) {
                 return true;
+            }
             m = 72;
             data = barcode.getBytes();
         } else if ("CODE128".equalsIgnoreCase(mode)) {
             barcode = barcode.trim();
             String newBarcode = StringUtils.replace(barcode, "{", "{{");
-            if (newBarcode.length() < 2 || newBarcode.length() > 253)
+            if (newBarcode.length() < 2 || newBarcode.length() > 253) {
                 return true;
+            }
             newBarcode = "{B" + newBarcode;
             m = 73;
             data = newBarcode.getBytes();
@@ -764,8 +805,9 @@ public class PrinterTPM80CommEntity extends BasePrinter {
                 }
             } else {
                 fw = pfw;
-                if (pfh > 0)
+                if (pfh > 0) {
                     fh = pfh;
+                }
             }
             Drawable drawable = null;
             if (!StringUtils.isBlank(filename)) {
@@ -790,7 +832,6 @@ public class PrinterTPM80CommEntity extends BasePrinter {
                 drawable.setBounds(0, 0, bitmap.getWidth(), bitmap.getHeight());
                 drawable.draw(canvas);
 
-                List<byte[]> listData = bitmap2printerdata(bitmap);
                 /*
 				int h = bitmap.getHeight();
 				int w = bitmap.getWidth();
@@ -809,9 +850,10 @@ public class PrinterTPM80CommEntity extends BasePrinter {
 					}
 				}
 				saveBitmap("/sdcard/mybmp.bmp",bitmap);
-				*/
+                 */
+                boolean res = printBitmap(bitmap);
                 bitmap.recycle();
-                printImage(listData);
+                return res;
             }
         } catch (Exception e) {
         } finally {
@@ -861,8 +903,9 @@ public class PrinterTPM80CommEntity extends BasePrinter {
                     break;
                 }
             }
-            if (isPrinted)
+            if (isPrinted) {
                 break;
+            }
             rlen--;
         }
         int nl = rlen & 0x0FF;
@@ -897,8 +940,7 @@ public class PrinterTPM80CommEntity extends BasePrinter {
                         int color = bitmap.getPixel(x, rr + y) & 0xFFFFFFFF;
                         if ((color & 0xFF0000) > 0x800000
                                 && (color & 0x00FF00) > 0x008000
-                                && (color & 0x0000FF) > 0x000080
-                                ) {
+                                && (color & 0x0000FF) > 0x000080) {
                             val = 0;
                         } else {
                             val = 1;
@@ -937,7 +979,9 @@ public class PrinterTPM80CommEntity extends BasePrinter {
     @Override
     protected boolean cutPaper(String mode) {
         byte b = 0;
-        if (PrinterOptions.CUT_HALF.equalsIgnoreCase(mode)) b = 1;
+        if (PrinterOptions.CUT_HALF.equalsIgnoreCase(mode)) {
+            b = 1;
+        }
 
         if (b == 0) {
             byte[] bufferCut = new byte[2];
@@ -1028,8 +1072,9 @@ public class PrinterTPM80CommEntity extends BasePrinter {
         if (!StringUtils.isBlank(FONTSIZE)) {
             fontSize = Integer.parseInt(FONTSIZE);
         }
-        if (fontSize < 16)
+        if (fontSize < 16) {
             fontSize = 16;
+        }
         int fw = IMAGE_MAX_WIDTH;
         int fh = fontSize + 16;
         int pfw = 0;
@@ -1158,9 +1203,9 @@ public class PrinterTPM80CommEntity extends BasePrinter {
             bitmap.recycle();
             bitmap = tBitmap;
         }
-        List<byte[]> listData = bitmap2printerdata(bitmap);
+        boolean res = printBitmap(bitmap);
         bitmap.recycle();
-        return printImage(listData);
+        return res;
     }
 
     private List<String> getFormattedText(String str, int lineChars) {
@@ -1176,10 +1221,11 @@ public class PrinterTPM80CommEntity extends BasePrinter {
                     blank = " ";
                 }
                 int len = 0;
-                if (ts[j] == null)
+                if (ts[j] == null) {
                     len = 0;
-                else
+                } else {
                     len = ts[j].getBytes().length;
+                }
                 if ((sb.length() + len) == lineChars) {
                     sb.append(ts[j]);
                     listText.add(sb.toString());
@@ -1245,5 +1291,11 @@ public class PrinterTPM80CommEntity extends BasePrinter {
             text = sb.toString();
         }
         return text;
+    }
+
+    @Override
+    protected boolean printBitmap(Bitmap bitmap) {
+        List<byte[]> listData = bitmap2printerdata(bitmap);
+        return printImage(listData);
     }
 }
