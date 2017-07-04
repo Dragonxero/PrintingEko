@@ -78,12 +78,29 @@ public class MainActivity extends AppCompatActivity {
         //basePrinter.print(textModel, hsmpParam);
         basePrinter.cmdQRCode(info);
         */
+
+        /*
+        EditText data = (EditText) findViewById(R.id.textdata);
+        String info = data.getText().toString().trim();
+
+       */
+        /*
         String textModel = "[FORMAT]\n" +
                 "[RESET]\n" +
-                "[DATAMATRIX]QRCODE:http://www.google.com\n" +
+                "[DATAMATRIX]QRCODE:www.google.cl\n" +
                 "[LINE]\n" +
                 "[CUT]HALF";
+        */
 
+        String textModel = "[FORMAT]\n"+
+                "[RESET]\n"+
+                "[LINE]\n"+
+                "[SETTINGS]HIGHSIZE=2;WIDESIZE=2;STRONG=Y;ALIGN=CENTER;COLOR=BLACK;\n"+
+                "[TEXT]Voucher\n"+
+                "[LINE]\n"+
+                "[SETTINGS]WIDTH=15;HEIGHT=15;\n"+
+                "[QRCODE]DATAMATRIX:www.google.cl\n"+
+                "[CUT]ALL";
         HashMap<String, String> hsmpParam = new HashMap<String, String>();
         BasePrinter basePrinter = CommEntity.getPrinter(1);
         basePrinter.print(textModel, hsmpParam);
