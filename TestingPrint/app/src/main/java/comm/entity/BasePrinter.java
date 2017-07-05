@@ -453,7 +453,8 @@ public abstract class BasePrinter {
         if (idx > 0) {
             String mode = str.substring(0, idx);
             int sizeDiv = mode.indexOf(",");
-            int size = 100;
+            //NOTE: QR code size defined in points.
+            int size = 400;
             if (sizeDiv > 0) {
                 size = Integer.parseInt(mode.substring(sizeDiv + 1));
                 mode = mode.substring(0, sizeDiv);

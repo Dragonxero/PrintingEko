@@ -94,16 +94,17 @@ public class MainActivity extends AppCompatActivity {
 
         String textModel = "[FORMAT]\n"+
                 "[RESET]\n"+
-                "[LINE]\n"+
-                "[SETTINGS]HIGHSIZE=2;WIDESIZE=2;STRONG=Y;ALIGN=CENTER;COLOR=BLACK;\n"+
+                "[SETTINGS]HIGHSIZE=2;WIDESIZE=2;STRONG=Y;UNDERLINE=N;ALIGN=CENTER;COLOR=BLACK;\n"+
                 "[TEXT]Voucher\n"+
-                "[LINE]\n"+
-                "[SETTINGS]WIDTH=15;HEIGHT=15;\n"+
                 "[QRCODE]DATAMATRIX:www.google.cl\n"+
-                "[CUT]ALL";
+                "[SETTINGS]STRONG=Y;UNDERLINE=N;ALIGN=CENTER;COLOR=BLACK;\n"+
+                "[TEXT]ViveEKO\nGracias por su Preferencia\n"+
+                "[CUT]HALF";
+
         HashMap<String, String> hsmpParam = new HashMap<String, String>();
         BasePrinter basePrinter = CommEntity.getPrinter(1);
         basePrinter.print(textModel, hsmpParam);
+
     }
 
     //Metodos para crear el QR y luego mostarlo en la pantalla.
