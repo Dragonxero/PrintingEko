@@ -40,9 +40,11 @@ public class MainActivity extends AppCompatActivity {
 
     private static String RecycleContainerModel = "[FORMAT]" +
             "[RESET]" +
-            "[SETTINGS]HIGHSIZE=1;WIDESIZE=1;STRONG=Y;ALIGN=CENTER;" +
+            "[SETTINGS]HIGHSIZE=1;WIDESIZE=1;STRONG=Y;ALIGN=CENTER;COLOR=BLACK" +
             "[TEXT]CONTENEDOR DE RECICLAJE" +
             "[LINE]" +
+            "[RESET]" +
+            "[SETTINGS]HIGHSIZE=1;WIDESIZE=1;STRONG=N;ALIGN=CENTER;COLOR=BLACK" +
             "[TEXT]NRO:$ID$" +
             "[LINE]" +
             "[QRCODE]DATAMATRIX:$DATA$;" +
@@ -85,20 +87,23 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void printQR(View view) {
-/*
+
         String textModel = "[FORMAT]\n"+
                 "[RESET]\n"+
-                "[SETTINGS]HIGHSIZE=2;WIDESIZE=2;STRONG=Y;UNDERLINE=N;ALIGN=CENTER;COLOR=BLACK;\n"+
-                "[TEXT]Voucher\n"+
-                "[QRCODE]DATAMATRIX:www.google.cl\n"+
-                "[SETTINGS]STRONG=Y;UNDERLINE=N;ALIGN=CENTER;COLOR=BLACK;\n"+
-                "[TEXT]ViveEKO\nGracias por su Preferencia\n"+
+                "[SETTINGS]HIGHSIZE=1;WIDESIZE=1;STRONG=Y;UNDERLINE=N;ALIGN=CENTER;COLOR;"+
+                "[LINE]"+
+                "[LINE]"+
+                "[TEXT]Voucher"+
+                "[LINE]"+
+                "[QRCODE]DATAMATRIX:www.google.cl"+
+                "[SETTINGS]STRONG=Y;UNDERLINE=N;ALIGN=CENTER;COLOR=BLACK;"+
+                "[LINE]"+
+                "[TEXT]ViveEKO" +
+                "[LINE]"+
+                "[TEXT]Gracias por su Preferencia"+
                 "[CUT]HALF";
-*/
 
-
-        printData("HOla inmundo mundo");
-
+        printData("www.google.com");
     }
     public static void printData(String data) {
         if (StringUtils.isNotBlank(data)) {
@@ -110,8 +115,6 @@ public class MainActivity extends AppCompatActivity {
             basePrinter.print(model, hsmpParam);
         }
     }
-
-
 
 
     //Metodos para crear el QR y luego mostarlo en la pantalla.

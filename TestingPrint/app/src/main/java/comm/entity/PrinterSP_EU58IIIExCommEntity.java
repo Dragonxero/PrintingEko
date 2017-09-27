@@ -521,9 +521,11 @@ public class PrinterSP_EU58IIIExCommEntity extends BasePrinter {
 		String newColor = null;
 		String oldColor = this.color;
 		if(PrinterOptions.COLOR_WHITE.equalsIgnoreCase(this.color)) {
-			newColor = PrinterOptions.COLOR_BLACK;
-		} else {
+			//newColor = PrinterOptions.COLOR_BLACK;
 			newColor = PrinterOptions.COLOR_WHITE;
+		} else {
+			//newColor = PrinterOptions.COLOR_WHITE;
+			newColor = PrinterOptions.COLOR_BLACK;
 		}
 		setColor(newColor);
 		sendData(str.getBytes());
