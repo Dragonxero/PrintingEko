@@ -1,6 +1,5 @@
 package com.example.matthew.testingprint;
 
-
 import android.graphics.Bitmap;
 import android.media.MediaScannerConnection;
 import android.os.Bundle;
@@ -16,6 +15,8 @@ import com.google.zxing.BarcodeFormat;
 import com.google.zxing.MultiFormatWriter;
 import com.google.zxing.WriterException;
 import com.google.zxing.common.BitMatrix;
+
+import org.apache.commons.lang3.StringUtils;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -36,11 +37,28 @@ public class MainActivity extends AppCompatActivity {
     EditText data;
     ImageView qr;
 
-    /*
-    NOTE: Crear objetos fuera ara usarlos de forma global requiere
-          que sean encontrados entro del metodo on create para ser
-          referenciados dentro del layout.
-     */
+
+    private static String RecycleContainerModel = "[FORMAT]" +
+            "[RESET]" +
+            "[SETTINGS]HIGHSIZE=1;WIDESIZE=1;STRONG=Y;ALIGN=CENTER;" +
+            "[TEXT]CONTENEDOR DE RECICLAJE" +
+            "[LINE]" +
+            "[TEXT]NRO:$ID$" +
+            "[LINE]" +
+            "[QRCODE]DATAMATRIX:$DATA$;" +
+            "[RESET]" +
+            "[SETTINGS]STRONG=Y;ALIGN=CENTER;" +
+            "[TEXT]Adjunte este voucher al contenedor retirado." +
+            "[LINE]"+
+            "[LINE]"+
+            "[LINE]"+
+            "[LINE]"+
+            "[LINE]"+
+            "[LINE]"+
+            "[LINE]"+
+            "[LINE]"+
+            "[CUT]ALL";
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -67,31 +85,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void printQR(View view) {
-        /*
-        EditText data = (EditText) findViewById(R.id.textdata);
-        String textModel = new String(IOUtils.readResource("assets/model/voucher_inst.txt"));
-        HashMap<String, String> hsmpParam = new HashMap<>();
-        String info = data.getText().toString().trim();
-        //TODO: Find a way to send qr to the printer.
-        hsmpParam.put("$QRDATA$", info);
-        BasePrinter basePrinter = CommEntity.getPrinter(1);
-        //basePrinter.print(textModel, hsmpParam);
-        basePrinter.cmdQRCode(info);
-        */
-
-        /*
-        EditText data = (EditText) findViewById(R.id.textdata);
-        String info = data.getText().toString().trim();
-
-       */
-        /*
-        String textModel = "[FORMAT]\n" +
-                "[RESET]\n" +
-                "[DATAMATRIX]QRCODE:www.google.cl\n" +
-                "[LINE]\n" +
-                "[CUT]HALF";
-        */
-
+/*
         String textModel = "[FORMAT]\n"+
                 "[RESET]\n"+
                 "[SETTINGS]HIGHSIZE=2;WIDESIZE=2;STRONG=Y;UNDERLINE=N;ALIGN=CENTER;COLOR=BLACK;\n"+
@@ -100,12 +94,25 @@ public class MainActivity extends AppCompatActivity {
                 "[SETTINGS]STRONG=Y;UNDERLINE=N;ALIGN=CENTER;COLOR=BLACK;\n"+
                 "[TEXT]ViveEKO\nGracias por su Preferencia\n"+
                 "[CUT]HALF";
+*/
 
-        HashMap<String, String> hsmpParam = new HashMap<String, String>();
-        BasePrinter basePrinter = CommEntity.getPrinter(1);
-        basePrinter.print(textModel, hsmpParam);
+
+        printData("HOla inmundo mundo");
 
     }
+    public static void printData(String data) {
+        if (StringUtils.isNotBlank(data)) {
+            HashMap<String, String> hsmpParam = new HashMap<String, String>();
+            BasePrinter basePrinter = CommEntity.getPrinter(1);
+            String model = RecycleContainerModel
+                    .replace("$DATA$", data)
+                    .replace("$ID$", "1");
+            basePrinter.print(model, hsmpParam);
+        }
+    }
+
+
+
 
     //Metodos para crear el QR y luego mostarlo en la pantalla.
     public String saveImage(Bitmap myBitmap) {
