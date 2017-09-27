@@ -1,5 +1,21 @@
 package comm.entity;
 
+import android.graphics.Bitmap;
+import android.graphics.Bitmap.Config;
+import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.Paint;
+import android.graphics.Paint.Style;
+import android.graphics.Rect;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
+
+import com.google.code.microlog4android.Logger;
+import com.google.zxing.BarcodeFormat;
+import com.google.zxing.EncodeHintType;
+import com.google.zxing.MultiFormatWriter;
+import com.google.zxing.common.BitMatrix;
+
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -10,32 +26,17 @@ import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.List;
 
-import android.graphics.Bitmap;
-import android.graphics.Canvas;
-import android.graphics.Color;
-import android.graphics.Paint;
-import android.graphics.Rect;
-import android.graphics.Bitmap.Config;
-import android.graphics.Paint.Style;
-import android.graphics.drawable.BitmapDrawable;
-import android.graphics.drawable.Drawable;
 import android_serialport_api.SerialPort;
+import common.SysConfig;
+import common.SysGlobal;
+import common.json.JSONUtils;
+import common.queue.FIFOQueue;
+import common.task.TaskAction;
+import common.task.TickTaskMgr;
+import common.utils.EncryptUtils;
+import common.utils.IOUtils;
+import common.utils.StringUtils;
 
-import com.google.code.microlog4android.Logger;
-import com.google.zxing.BarcodeFormat;
-import com.google.zxing.EncodeHintType;
-import com.google.zxing.MultiFormatWriter;
-import com.google.zxing.common.BitMatrix;
-import com.incomrecycle.common.SysConfig;
-import com.incomrecycle.common.SysGlobal;
-import com.incomrecycle.common.json.JSONUtils;
-import com.incomrecycle.common.queue.FIFOQueue;
-import com.incomrecycle.common.task.TaskAction;
-import com.incomrecycle.common.task.TickTaskMgr;
-import com.incomrecycle.common.utils.EncryptUtils;
-import com.incomrecycle.common.utils.IOUtils;
-import com.incomrecycle.common.utils.StringUtils;
-import com.incomrecycle.prms.rvm.comm.entity.BasePrinter.PrinterOptions;
 
 public class PrinterSP_EU58IIIExCommEntity extends BasePrinter {
 	private final static Logger logger = Logger.getLogger("PrinterCommEntity");
